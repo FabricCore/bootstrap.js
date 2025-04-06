@@ -24,16 +24,12 @@ let require = (path, catchMode) => {
         Loader.createFileIfNotExist(filePath);
         let content = Loader.readFile(filePath);
 
-        switch (ext) {
-            case "js":
-                return Core.eval(content, catchMode, filePath.toString());
-            case "json":
-                return JSON.parse(content);
-            case "txt":
-                return content;
-            default:
-                catchMode.handle(`unknown file type ${JSON.stringify(ext)}`);
-        }
+        if (ext == "js")
+            return Core.eval(content, catchMode, filePath.toString());
+        if (ext == "json") return JSON.parse(content);
+        if (ext == "txt") return content;
+
+        catchMode.handle(`unknown file type ${JSON.stringify(ext)}`);
     } catch (e) {
         if (catchMode === undefined) CatchMode.THROW.handle(e);
         else catchMode.handle(e);

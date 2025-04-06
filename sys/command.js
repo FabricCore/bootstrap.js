@@ -38,9 +38,7 @@ let Command = {
                 return false;
             }
 
-            if (typeof tree.args !== "object") return;
-
-            for (let [key, value] of Object.entries(tree.args)) {
+            for (let [key, value] of Object.entries(tree.args ?? {})) {
                 value.name = key;
                 testName(value);
             }
