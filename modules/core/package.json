@@ -1,0 +1,14 @@
+{
+    "name": "core",
+    "version": "0.1.0",
+    "authors": [ "Sirius" ],
+    "description": "Core library.",
+    "license": "AGPL-3.0-or-later",
+    "keywords": [ "core" ],
+
+    "entry": "entry.js",
+    "dependencies": {},
+
+    "repository": null,
+    "homepage": null
+}

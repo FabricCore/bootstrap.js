@@ -1,7 +1,7 @@
 function getTask(u, onRecv, bodyHandler) {
     if (typeof onRecv !== "function")
         onRecv = (res) => console.log(`\u00A7e${res.body()}`);
-    if (typeof BodyHandlers !== "object") bodyHandler = BodyHandlers.ofString();
+    if (typeof bodyHandler !== "object") bodyHandler = BodyHandlers.ofString();
     if (u === undefined) {
         console.error("No URL specified.");
         return;

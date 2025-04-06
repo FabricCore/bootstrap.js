@@ -1,4 +1,4 @@
-const {
+let {
     BoolArgumentType,
     DoubleArgumentType,
     FloatArgumentType,
@@ -7,10 +7,10 @@ const {
     StringArgumentType,
 } = Packages.com.mojang.brigadier.arguments;
 
-const ClientCommandRegistrationCallback =
+let ClientCommandRegistrationCallback =
     Packages.net.fabricmc.fabric.api.client.command.v2
         .ClientCommandRegistrationCallback;
-const ClientCommandManager =
+let ClientCommandManager =
     Packages.net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 
 // goal
@@ -26,7 +26,7 @@ const ClientCommandManager =
 //     },
 // });
 
-const Command = {
+let Command = {
     register: (argTree) => {
         function testName(tree) {
             if (tree === undefined) return;

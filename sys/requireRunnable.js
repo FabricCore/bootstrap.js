@@ -1,4 +1,4 @@
-const requireRunnable = (path, catchMode) => {
+let requireRunnable = (path, catchMode) => {
     try {
         if (path === undefined) throw new Error("no file path specified");
         if (catchMode == undefined) catchMode = CatchMode.PRINT;
