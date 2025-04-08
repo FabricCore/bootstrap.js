@@ -47,5 +47,5 @@ let updatePlayer = () => {
     p = new Packages.yarnwrap.entity.Entity(player.wrapperContained);
 };
 
-require("sys/mod.js");
+require("sys/index.js");
 require("init.js");

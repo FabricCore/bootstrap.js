@@ -57,6 +57,59 @@ let Command = {
 
         ClientCommandRegistrationCallback.EVENT.register(registerer);
     },
+    _buildLiteral: (package, tree) => {
+        let command = ClientCommandManager.literal(tree.name);
+
+        if (typeof tree.execute === "string") {
+            command = command.executes(
+                requireRunnable(`${package}/${tree.execute}`),
+            );
+        }
+
+        tree.args ??= {};
+        tree.subcommands ??= {};
+
+        for (let [name, value] of Object.entries(tree.args)) {
+            value.name = name;
+            command = command.then(Command._buildArgument(package, value));
+        }
+
+        for (let [name, value] of Object.entries(tree.subcommands)) {
+            value.name = name;
+            command = command.then(Command._buildLiteral(package, value));
+        }
+
+        return command;
+    },
+    _buildArgument: (package, tree) => {
+        let argument = ClientCommandManager.argument(tree.name, tree.type);
+
+        if (typeof tree.execute === "string") {
+            argument = argument.executes(
+                requireRunnable(`${package}/${tree.execute}`),
+            );
+        }
+
+        tree.args ??= {};
+        tree.subcommands ??= {};
+
+        for (let [name, value] of Object.entries(tree.args)) {
+            value.name = name;
+            command = command.then(Command._buildArgument(package, value));
+        }
+
+        for (let [name, value] of Object.entries(tree.subcommands)) {
+            value.name = name;
+            command = command.then(Command._buildLiteral(package, value));
+        }
+
+        return argument;
+    },
+    _registerReal: (name, dispatcher, _registry) => {
+        let tree = Command.tree[name];
+        dispatcher.register(Command._buildLiteral(tree.package, tree));
+    },
+    /*
     _registerReal: (name, dispatcher, registry) => {
         try {
             let tree = Command.tree[name];
@@ -93,6 +146,6 @@ let Command = {
 
             dispatcher.register(command);
         } catch (e) {}
-    },
+    },*/
     tree: {},
 };

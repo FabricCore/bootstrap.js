@@ -1,1 +1,1 @@
-let version = require("version.txt");
+let version = require("sys/version.txt");
