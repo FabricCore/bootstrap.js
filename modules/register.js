@@ -19,8 +19,10 @@
 
     let dependencies = Object.values(modules).flatMap((module) =>
         Object.entries(module.dependencies).map(([dep, ver]) => {
-            modules[dep].requiredBy ??= [];
-            modules[dep].requiredBy.push(module.name);
+            if (modules[dep] != undefined) {
+                modules[dep].requiredBy ??= [];
+                modules[dep].requiredBy.push(module.name);
+            }
 
             return {
                 requiredBy: module.name,

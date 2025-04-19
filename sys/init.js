@@ -1,6 +1,7 @@
 // imports
 let Loader = Packages.ws.siri.jscore.Loader;
 let Core = Packages.ws.siri.jscore.Core;
+let yarnwrap = Packages.yarnwrap;
 let CatchMode = Packages.ws.siri.jscore.CatchMode;
 let FabricLoader = Packages.net.fabricmc.loader.api.FabricLoader;
 
@@ -41,11 +42,22 @@ let console = {
 };
 
 // required declarations
-var player, p;
+let player, pEntity, pLiving;
 let updatePlayer = () => {
     player = mc.player();
-    p = new Packages.yarnwrap.entity.Entity(player.wrapperContained);
+    pEntity = new yarnwrap.entity.Entity(player.wrapperContained);
+    pLiving = new yarnwrap.entity.LivingEntity(
+        player.wrapperContained,
+    );
 };
+
+let clearPlayer = () => {
+    player = null;
+    pEntity = null;
+    pLiving = null;
+};
+
+clearPlayer();
 
 require("sys/index.js");
 require("init.js");

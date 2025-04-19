@@ -95,57 +95,24 @@ let Command = {
 
         for (let [name, value] of Object.entries(tree.args)) {
             value.name = name;
-            command = command.then(Command._buildArgument(package, value));
+            argument = argument.then(Command._buildArgument(package, value));
         }
 
         for (let [name, value] of Object.entries(tree.subcommands)) {
             value.name = name;
-            command = command.then(Command._buildLiteral(package, value));
+            argument = argument.then(Command._buildLiteral(package, value));
         }
 
         return argument;
     },
     _registerReal: (name, dispatcher, _registry) => {
-        let tree = Command.tree[name];
-        dispatcher.register(Command._buildLiteral(tree.package, tree));
-    },
-    /*
-    _registerReal: (name, dispatcher, registry) => {
         try {
             let tree = Command.tree[name];
-            let package = tree.package;
-            let command = ClientCommandManager.literal(tree.name);
-
-            if (typeof tree.execute === "string") {
-                command.executes(requireRunnable(`${package}/${tree.execute}`));
-            }
-
-            function getArgument(name, tree) {
-                let argument = ClientCommandManager.argument(name, tree.type);
-
-                if (typeof tree.args === "object") {
-                    for (let [key, value] of Object.entries(tree.args)) {
-                        argument = argument.then(getArgument(key, value));
-                    }
-                }
-
-                if (typeof tree.execute === "string") {
-                    argument = argument.executes(
-                        requireRunnable(`${package}/${tree.execute}`),
-                    );
-                }
-
-                return argument;
-            }
-
-            if (typeof tree.args === "object") {
-                for (let [key, value] of Object.entries(tree.args)) {
-                    command = command.then(getArgument(key, value));
-                }
-            }
-
-            dispatcher.register(command);
-        } catch (e) {}
-    },*/
+            dispatcher.register(Command._buildLiteral(tree.package, tree));
+        } catch (e) {
+            console.error(`Failed to register command ${name}`);
+            console.error(e);
+        }
+    },
     tree: {},
 };
