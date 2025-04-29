@@ -50,7 +50,7 @@ let Command = {
 
         Command.tree[argTree.name] = argTree;
 
-        let registerer = Core.runnable(
+        let registerer = Core.runnable.create(
             `${argTree.package}-${argTree.name}-register`,
             `function register(dispatcher, registry) { return Command._registerReal(\"${argTree.name}\", dispatcher, registry); }`,
         );

@@ -1,11 +1,9 @@
 // imports
-let Loader = Packages.ws.siri.jscore.Loader;
-let Core = Packages.ws.siri.jscore.Core;
-let yarnwrap = Packages.yarnwrap;
-let CatchMode = Packages.ws.siri.jscore.CatchMode;
+let jscore = Packages.ws.siri.jscore;
+let Loader = jscore.Loader;
+let Core = jscore.Core;
+let CatchMode = jscore.CatchMode;
 let FabricLoader = Packages.net.fabricmc.loader.api.FabricLoader;
-
-let mc = Core.getClient();
 
 // env
 let paths = {
@@ -38,26 +36,8 @@ let require = (path, catchMode) => {
 };
 let console = {
     log: Core.log,
-    error: Core.error,
+    error: (msg) => console.log(`\u00A77[\u00A76Error\u00A77] \u00A7c${msg}`),
 };
-
-// required declarations
-let player, pEntity, pLiving;
-let updatePlayer = () => {
-    player = mc.player();
-    pEntity = new yarnwrap.entity.Entity(player.wrapperContained);
-    pLiving = new yarnwrap.entity.LivingEntity(
-        player.wrapperContained,
-    );
-};
-
-let clearPlayer = () => {
-    player = null;
-    pEntity = null;
-    pLiving = null;
-};
-
-clearPlayer();
 
 require("sys/index.js");
 require("init.js");
