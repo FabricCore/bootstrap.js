@@ -14,7 +14,9 @@
         .forEach((entry) => {
             entries[entry.name] = entry.entry ?? "entry.js";
             modules[entry.name] = entry;
-            modules[entry.name].versionCode = entry.version.split(".");
+            modules[entry.name].versionCode = entry.version
+                .split(".")
+                .map((s) => parseInt(s.trim()));
         });
 
     let dependencies = Object.values(modules).flatMap((module) =>
@@ -27,11 +29,14 @@
             return {
                 requiredBy: module.name,
                 version: ver,
-                versionCode: ver.split("."),
+                versionCode: ver.split(".").map((s) => parseInt(s.trim())),
                 name: dep,
             };
         }),
     );
+
+    let dependenciesMap = {};
+    dependencies.forEach((dep) => (dependenciesMap[dep.name] = dep));
 
     let cannotLoad = {};
 
@@ -50,7 +55,29 @@
                     : `${dep.name}=${dep.version} is required by ${dep.requiredBy}, but ${dep.name}=${modules[dep.name].version} is found`,
             );
             return dep.requiredBy;
-        });
+        })
+        .concat(
+            Object.values(modules)
+                .filter((module) => {
+                    if (!Array.isArray(module.javaDependencies)) return false;
+
+                    for (let javaDep of module.javaDependencies) {
+                        try {
+                            java.lang.Package.getPackage(javaDep);
+                            return false;
+                        } catch (ignored) {
+                            console.error(
+                                `Java class ${javaDep} is required by ${module.name}, but it is not present`,
+                            );
+                            return true;
+                        }
+                    }
+                })
+                .map((mod) => {
+                    cannotLoad[mod.name] = [];
+                    return mod.name;
+                }),
+        );
 
     violations.forEach((module) => {
         function addEntry(module) {
@@ -68,7 +95,10 @@
 
     Object.entries(cannotLoad).forEach(([module, deps]) => {
         console.error(
-            `Cannot load module "${module}", could not resolve required ${deps.length < 2 ? "dependency" : "dependencies"} ${deps.map((mod) => `"${mod}"`).join(", ")}`,
+            `Cannot load module "${module}", could not resolve required ${deps.length < 2 ? "dependency" : "dependencies"} ${deps
+                .filter((mod) => cannotLoad[mod])
+                .map((mod) => `"${mod}"`)
+                .join(", ")}`,
         );
     });
 
