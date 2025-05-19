@@ -3,11 +3,12 @@ let jscore = Packages.ws.siri.jscore;
 let Loader = jscore.Loader;
 let Core = jscore.Core;
 let CatchMode = jscore.CatchMode;
-let FabricLoader = Packages.net.fabricmc.loader.api.FabricLoader;
 
 // env
 let paths = {
-    config: FabricLoader.getInstance().getConfigDir().resolve(Core.MOD_ID),
+    config: Packages.net.fabricmc.loader.api.FabricLoader.getInstance()
+        .getConfigDir()
+        .resolve(Core.MOD_ID),
 };
 
 // core function
@@ -36,7 +37,22 @@ let require = (path, catchMode) => {
 };
 let console = {
     log: Core.log,
-    error: (msg) => console.log(`\u00A77[\u00A76Error\u00A77] \u00A7c${msg}`),
+    error: (msg) => {
+        console.log(console.errorFormat(msg));
+        console.history.error.push(msg);
+        if (
+            console.history.errorCap != -1 &&
+            console.history.error.length > console.history.errorCap
+        )
+            console.history.error.shift();
+    },
+
+    errorFormat: (msg) => `\u00A77[\u00A76Error\u00A77] \u00A7c${msg}`,
+    history: {
+        error: [],
+        errorCap: 100,
+        errorClean: () => (console.history.error = []),
+    },
 };
 
 require("sys/index.js");

@@ -1,3 +1,5 @@
+let Command = {};
+
 let {
     BoolArgumentType,
     DoubleArgumentType,
@@ -7,27 +9,27 @@ let {
     StringArgumentType,
 } = Packages.com.mojang.brigadier.arguments;
 
-let ClientCommandRegistrationCallback =
-    Packages.net.fabricmc.fabric.api.client.command.v2
-        .ClientCommandRegistrationCallback;
-let ClientCommandManager =
-    Packages.net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+{
+    let ClientCommandRegistrationCallback =
+        Packages.net.fabricmc.fabric.api.client.command.v2
+            .ClientCommandRegistrationCallback;
+    let ClientCommandManager =
+        Packages.net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 
-// goal
-// Command.register({
-//     package: "cmd/testCommand"
-//     name: "name of command",
-//     execute: "main.js"
-//     args: {
-//         "name of argument": {
-//             type: StringArgumentType.greedyString(),
-//             args: {},
-//         }
-//     },
-// });
+    // goal
+    // Command.register({
+    //     package: "cmd/testCommand"
+    //     name: "name of command",
+    //     execute: "main.js"
+    //     args: {
+    //         "name of argument": {
+    //             type: StringArgumentType.greedyString(),
+    //             args: {},
+    //         }
+    //     },
+    // });
 
-let Command = {
-    register: (argTree) => {
+    Command.register = (argTree) => {
         function testName(tree) {
             if (tree === undefined) return;
 
@@ -56,8 +58,8 @@ let Command = {
         );
 
         ClientCommandRegistrationCallback.EVENT.register(registerer);
-    },
-    _buildLiteral: (package, tree) => {
+    };
+    Command._buildLiteral = (package, tree) => {
         let command = ClientCommandManager.literal(tree.name);
 
         if (typeof tree.execute === "string") {
@@ -80,8 +82,8 @@ let Command = {
         }
 
         return command;
-    },
-    _buildArgument: (package, tree) => {
+    };
+    Command._buildArgument = (package, tree) => {
         let argument = ClientCommandManager.argument(tree.name, tree.type);
 
         if (typeof tree.execute === "string") {
@@ -104,8 +106,8 @@ let Command = {
         }
 
         return argument;
-    },
-    _registerReal: (name, dispatcher, _registry) => {
+    };
+    Command._registerReal = (name, dispatcher, _registry) => {
         try {
             let tree = Command.tree[name];
             dispatcher.register(Command._buildLiteral(tree.package, tree));
@@ -113,6 +115,6 @@ let Command = {
             console.error(`Failed to register command ${name}`);
             console.error(e);
         }
-    },
-    tree: {},
-};
+    };
+    Command.tree = {};
+}
