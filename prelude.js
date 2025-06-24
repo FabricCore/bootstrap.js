@@ -1,8 +1,11 @@
 let prelude = {};
 
 prelude.evalStack = ["prelude"];
+prelude.moduleName = module.path[1];
 
-if (module.globals.loadOrder !== undefined) {
+if (module.path[0] != "modules" || prelude.moduleName == undefined) {
+
+} else if (module.globals.loadDependencies[prelude.moduleName]) {
     let net = Packages.ws.siri.jscore.mapping.JSPackage.getRoot().net;
     let MinecraftClient = net.minecraft.client.MinecraftClient;
     let Text = net.minecraft.text.Text;
@@ -52,7 +55,7 @@ if (module.globals.loadOrder !== undefined) {
     let modulesPath = FabricLoader.getInstance()
         .getConfigDir().resolve("jscore").resolve("modules");
 
-    for (let name of module.globals.loadOrder) {
+    for (let name of module.globals.loadDependencies[prelude.moduleName] ?? []) {
         let modulePath = modulesPath.resolve(name);
 
         if (module.globals.loadedModules === undefined || !module.globals.loadedModules[name]) continue;

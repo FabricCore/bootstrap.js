@@ -30,8 +30,8 @@ for (let modulePath of Files.list(modulesPath).toList()) {
     }
 }
 
-module.globals.loadOrder = [];
 module.globals.loadedModules = {};
+module.globals.loadDependencies = {};
 
 // topological sort
 while (Object.keys(registeredModules).length !== 0) {
@@ -45,14 +45,19 @@ while (Object.keys(registeredModules).length !== 0) {
 
     for (let moduleName of toBeLoaded) {
         try {
-            module.require(`/modules/${moduleName}`);
+            if (Files.exists(modulesPath.resolve(moduleName).resolve("init.js")) || Files.exists(modulesPath.resolve(moduleName).resolve("init").resolve("index.js"))) {
+                module.require(`/modules/${moduleName}/init`);
+            }
 
             delete registeredModules[moduleName];
             module.globals.loadedModules[moduleName] = true;
-            module.globals.loadOrder.push(moduleName);
 
             for (let moduleManifest of Object.values(registeredModules)) {
-                delete moduleManifest.dependencies[moduleName];
+                if (moduleManifest.dependencies[moduleName] != undefined) {
+                    delete moduleManifest.dependencies[moduleName];
+                    module.globals.loadDependencies[moduleManifest.name] ??= [];
+                    module.globals.loadDependencies[moduleManifest.name].push(moduleName);
+                }
             }
         } catch (error) {
             // TODO show error message on failed to load
