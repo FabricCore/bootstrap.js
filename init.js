@@ -56,12 +56,29 @@ while (Object.keys(registeredModules).length !== 0) {
                 if (moduleManifest.dependencies[moduleName] != undefined) {
                     delete moduleManifest.dependencies[moduleName];
                     module.globals.loadDependencies[moduleManifest.name] ??= [];
+
+                    if (module.globals.loadDependencies[moduleName]) {
+                        Array.prototype.push.apply(module.globals.loadDependencies[moduleManifest.name], module.globals.loadDependencies[moduleName]);
+                    }
+
                     module.globals.loadDependencies[moduleManifest.name].push(moduleName);
                 }
             }
         } catch (error) {
             // TODO show error message on failed to load
         }
+    }
+
+    // remove duplicates
+    for (let moduleName in module.globals.loadDependencies) {
+        let addedSet = new Set();
+
+        module.globals.loadDependencies[moduleName] =
+            module.globals.loadDependencies[moduleName].filter(dep => {
+                let has = addedSet.has(dep);
+                addedSet.add(dep);
+                return !has;
+            });
     }
 
     if (toBeLoaded.length === 0) {
