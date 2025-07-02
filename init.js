@@ -2,8 +2,25 @@
 //     return semver.split(".").map(parseInt);
 // }
 
+let Core = Packages.ws.siri.Core;
+
+let net = Packages.ws.siri.jscore.mapping.JSPackage.getRoot().net;
+let MinecraftClient = net.minecraft.client.MinecraftClient;
+let Text = net.minecraft.text.Text;
+
+let LoggerFactory = org.slf4j.LoggerFactory;
+let logger = LoggerFactory.getLogger(Core.MOD_ID);
+
+function error(content) {
+    content ??= "";
+    logger.error(content);
+    if (MinecraftClient.getInstance().player != null) {
+        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("u00A7l" + content));
+    }
+}
+
 let Files = Packages.java.nio.file.Files;
-let FabricLoader = net.fabricmc.loader.api.FabricLoader;
+let FabricLoader = Packages.net.fabricmc.loader.api.FabricLoader;
 
 let modulesPath = FabricLoader.getInstance()
     .getConfigDir().resolve("jscore").resolve("modules");
@@ -16,7 +33,7 @@ for (let modulePath of Files.list(modulesPath).toList()) {
     let manifestPath = modulePath.resolve("package.json");
 
     if (!Files.exists(manifestPath)) {
-        // TODO print an error?
+        error(`Could not find package.json for ${name}, not loaded.`);
         continue;
     }
 
@@ -25,7 +42,7 @@ for (let modulePath of Files.list(modulesPath).toList()) {
         let manifestJSON = JSON.parse(manifestContent);
         registeredModules[name] = manifestJSON;
     } catch (error) {
-        // TODO print an error?
+        error(`Could not read package.json for ${name}, not loaded. Cause: ${error}`);
         continue;
     }
 }
@@ -65,7 +82,7 @@ while (Object.keys(registeredModules).length !== 0) {
                 }
             }
         } catch (error) {
-            // TODO show error message on failed to load
+            error(`Failed when registering module ${moduleName}, not loaded. Cause: ${error}`);
         }
     }
 
@@ -82,7 +99,7 @@ while (Object.keys(registeredModules).length !== 0) {
     }
 
     if (toBeLoaded.length === 0) {
-        // some dependencies could not be loaded
+        error(`The following modules are not loaded: ${Object.keys(registeredModules).join(', ')}, either because there is a cycle in dependency, or a dependency module has failed to load`);
         break;
     }
 }
