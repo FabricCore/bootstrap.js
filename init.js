@@ -15,7 +15,9 @@ function error(content) {
     content ??= "";
     logger.error(content);
     if (MinecraftClient.getInstance().player != null) {
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("u00A7l" + content));
+        MinecraftClient.getInstance()
+            .inGameHud.getChatHud()
+            .addMessage(Text.literal("\u00A7c" + content));
     }
 }
 
@@ -23,9 +25,13 @@ let Files = Packages.java.nio.file.Files;
 let FabricLoader = Packages.net.fabricmc.loader.api.FabricLoader;
 
 let modulesPath = FabricLoader.getInstance()
-    .getConfigDir().resolve("jscore").resolve("modules");
+    .getConfigDir()
+    .resolve("jscore")
+    .resolve("modules");
 
-let registeredModules = {}
+let registeredModules = {};
+
+let console = module.require("modules/console");
 
 for (let modulePath of Files.list(modulesPath).toList()) {
     let name = modulePath.getFileName();
@@ -40,9 +46,19 @@ for (let modulePath of Files.list(modulesPath).toList()) {
     try {
         let manifestContent = Files.readString(manifestPath);
         let manifestJSON = JSON.parse(manifestContent);
+
+        if (name != manifestJSON.name) {
+            error(
+                `Name mismatch: package at ${name} has manifest name ${manifestJSON.name}`,
+            );
+            continue;
+        }
+
         registeredModules[name] = manifestJSON;
     } catch (error) {
-        error(`Could not read package.json for ${name}, not loaded. Cause: ${error}`);
+        error(
+            `Could not read package.json for ${name}, not loaded. Cause: ${error}`,
+        );
         continue;
     }
 }
@@ -61,12 +77,22 @@ while (Object.keys(registeredModules).length !== 0) {
     }
 
     for (let moduleName of toBeLoaded) {
+        delete registeredModules[moduleName];
         try {
-            if (Files.exists(modulesPath.resolve(moduleName).resolve("init.js")) || Files.exists(modulesPath.resolve(moduleName).resolve("init").resolve("index.js"))) {
+            if (
+                Files.exists(
+                    modulesPath.resolve(moduleName).resolve("init.js"),
+                ) ||
+                Files.exists(
+                    modulesPath
+                        .resolve(moduleName)
+                        .resolve("init")
+                        .resolve("index.js"),
+                )
+            ) {
                 module.require(`/modules/${moduleName}/init`);
             }
 
-            delete registeredModules[moduleName];
             module.globals.loadedModules[moduleName] = true;
 
             for (let moduleManifest of Object.values(registeredModules)) {
@@ -75,14 +101,23 @@ while (Object.keys(registeredModules).length !== 0) {
                     module.globals.loadDependencies[moduleManifest.name] ??= [];
 
                     if (module.globals.loadDependencies[moduleName]) {
-                        Array.prototype.push.apply(module.globals.loadDependencies[moduleManifest.name], module.globals.loadDependencies[moduleName]);
+                        Array.prototype.push.apply(
+                            module.globals.loadDependencies[
+                                moduleManifest.name
+                            ],
+                            module.globals.loadDependencies[moduleName],
+                        );
                     }
 
-                    module.globals.loadDependencies[moduleManifest.name].push(moduleName);
+                    module.globals.loadDependencies[moduleManifest.name].push(
+                        moduleName,
+                    );
                 }
             }
         } catch (error) {
-            error(`Failed when registering module ${moduleName}, not loaded. Cause: ${error}`);
+            error(
+                `Failed when registering module ${moduleName}, not loaded. Cause: ${error}`,
+            );
         }
     }
 
@@ -91,7 +126,7 @@ while (Object.keys(registeredModules).length !== 0) {
         let addedSet = new Set();
 
         module.globals.loadDependencies[moduleName] =
-            module.globals.loadDependencies[moduleName].filter(dep => {
+            module.globals.loadDependencies[moduleName].filter((dep) => {
                 let has = addedSet.has(dep);
                 addedSet.add(dep);
                 return !has;
@@ -99,7 +134,9 @@ while (Object.keys(registeredModules).length !== 0) {
     }
 
     if (toBeLoaded.length === 0) {
-        error(`The following modules are not loaded: ${Object.keys(registeredModules).join(', ')}, either because there is a cycle in dependency, or a dependency module has failed to load`);
+        error(
+            `The following modules are not loaded: ${Object.keys(registeredModules).join(", ")}, either because there is a cycle in dependency, or a dependency module has failed to load`,
+        );
         break;
     }
 }
