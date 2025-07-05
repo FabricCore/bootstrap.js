@@ -24,12 +24,12 @@ if (module.path[0] != "modules" || prelude.moduleName == undefined) {
                 module.evalFile(`{${preludeContent}}`, path.toString());
             } catch (e2) {
                 if (MinecraftClient.getInstance().player != null) {
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(`Error while in prelude.evalFile: ${error.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`).formatted(Formatting.byName("RED")));
+                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(`Error while in prelude.evalFile: ${error.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`).formatted(Formatting.RED));
                 }
             }
         } catch (e) {
             if (MinecraftClient.getInstance().player != null) {
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(`Error while in prelude.eval file, reading file at path ${path}: ${error.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`).formatted(Formatting.byName("RED")));
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(`Error while in prelude.eval file, reading file at path ${path}: ${error.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`).formatted(Formatting.RED));
             }
         }
 
@@ -43,7 +43,7 @@ if (module.path[0] != "modules" || prelude.moduleName == undefined) {
             module.eval(content);
         } catch (e2) {
             if (MinecraftClient.getInstance().player != null) {
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(`Error while in prelude.eval [ident=${ident}]: ${error.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`).formatted(Formatting.byName("RED")));
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(`Error while in prelude.eval [ident=${ident}]: ${error.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`).formatted(Formatting.RED));
             }
         }
 
