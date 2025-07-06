@@ -31,15 +31,13 @@ let modulesPath = FabricLoader.getInstance()
 
 let registeredModules = {};
 
-let console = module.require("modules/console");
-
 for (let modulePath of Files.list(modulesPath).toList()) {
     let name = modulePath.getFileName();
 
     let manifestPath = modulePath.resolve("package.json");
 
     if (!Files.exists(manifestPath)) {
-        error(`Could not find package.json for ${name}, not loaded.`);
+        error(`Could not find package.json for ${name}, that module is not loaded.`);
         continue;
     }
 
