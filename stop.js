@@ -1,6 +1,24 @@
+let Core = Packages.ws.siri.Core;
+
+let net = Packages.ws.siri.jscore.mapping.JSPackage.getRoot().net;
+let MinecraftClient = net.minecraft.client.MinecraftClient;
+let Text = net.minecraft.text.Text;
+
+let LoggerFactory = org.slf4j.LoggerFactory;
+let logger = LoggerFactory.getLogger(Core.MOD_ID);
+
+function error(content) {
+    content ??= "";
+    logger.error(content);
+    if (MinecraftClient.getInstance().player != null) {
+        MinecraftClient.getInstance()
+            .inGameHud.getChatHud()
+            .addMessage(Text.literal("\u00A7c" + content));
+    }
+}
+
 let Files = Packages.java.nio.file.Files;
 let FabricLoader = Packages.net.fabricmc.loader.api.FabricLoader;
-
 let modulesPath = FabricLoader.getInstance()
     .getConfigDir()
     .resolve("jscore")
@@ -59,7 +77,7 @@ function getLocalManifests() {
             modulesPath.resolve(package).resolve("package.json"),
         );
         let manifestJSON = JSON.parse(manifestContent);
-        out[package] = manifestJSON;
+        out[package.getFileName()] = manifestJSON;
     }
 
     return out;

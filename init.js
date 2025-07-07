@@ -1,7 +1,3 @@
-// function parseSemVer(semver) {
-//     return semver.split(".").map(parseInt);
-// }
-
 let Core = Packages.ws.siri.Core;
 
 let net = Packages.ws.siri.jscore.mapping.JSPackage.getRoot().net;
