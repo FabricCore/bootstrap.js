@@ -33,7 +33,9 @@ for (let modulePath of Files.list(modulesPath).toList()) {
     let manifestPath = modulePath.resolve("package.json");
 
     if (!Files.exists(manifestPath)) {
-        error(`Could not find package.json for ${name}, that module is not loaded.`);
+        error(
+            `Could not find package.json for ${name}, that module is not loaded.`,
+        );
         continue;
     }
 
