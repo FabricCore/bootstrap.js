@@ -58,10 +58,14 @@ function order(manifests) {
 
 function stop(moduleName) {
     if (
-        Files.exists(modulesPath.resolve(moduleName).resolve("stop.js")) ||
-        Files.exists(
-            modulesPath.resolve(moduleName).resolve("stop").resolve("index.js"),
-        )
+        module.globals.loadedModules[moduleName] &&
+        (Files.exists(modulesPath.resolve(moduleName).resolve("stop.js")) ||
+            Files.exists(
+                modulesPath
+                    .resolve(moduleName)
+                    .resolve("stop")
+                    .resolve("index.js"),
+            ))
     ) {
         module.require(`/modules/${moduleName}/stop`);
     }

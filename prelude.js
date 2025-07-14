@@ -85,7 +85,7 @@ if (module.path[0] != "modules" || prelude.moduleName == undefined) {
             continue;
 
         let preludePath = modulePath.resolve("prelude.js");
-
+        
         if (!Files.exists(preludePath)) {
             if (
                 Files.exists(modulePath.resolve("prelude").resolve("index.js"))
