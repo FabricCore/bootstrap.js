@@ -58,6 +58,12 @@ function order(manifests) {
 
 function stop(moduleName) {
     if (
+        module.globals == undefined ||
+        module.globals.loadedModules == undefined
+    )
+        return;
+
+    if (
         module.globals.loadedModules[moduleName] &&
         (Files.exists(modulesPath.resolve(moduleName).resolve("stop.js")) ||
             Files.exists(
