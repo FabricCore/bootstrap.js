@@ -1,49 +1,39 @@
-let prelude = {};
+let prelude = {
+    moduleName: module.path[1],
+};
 
-prelude.evalStack = ["prelude"];
-prelude.moduleName = module.path[1];
+if (
+    !(
+        module.path[0] != "modules" ||
+        prelude.moduleName == undefined ||
+        module.globals.init == undefined
+    ) &&
+    module.globals.loadDependencies[prelude.moduleName]
+) {
+    module.globals.prelude ??= {};
+    module.globals.preludePaths ??= {};
+    prelude.evalStack = ["prelude"];
+    let { Files, Path } = java.nio.file;
 
-if (module.path[0] != "modules" || prelude.moduleName == undefined) {
-} else if (module.globals.loadDependencies[prelude.moduleName]) {
-    let net = Packages.ws.siri.jscore.mapping.JSPackage.getRoot().net;
-    let MinecraftClient = net.minecraft.client.MinecraftClient;
-    let Text = net.minecraft.text.Text;
-    let Formatting = net.minecraft.util.Formatting;
-    let Files = Packages.java.nio.file.Files;
-    let Path = java.nio.file.Path;
-
-    prelude.evalFile = function (path) {
-        if (!path.isAbsolute()) path = Path.of("/").resolve(path);
+    prelude.evalString = function (name) {
+        let path = module.globals.preludePaths[name];
         prelude.evalStack.push(path);
-
         try {
-            let preludeContent = Files.readString(path);
-
-            try {
-                module.evalFile(`{${preludeContent}}`, path.toString());
-            } catch (e2) {
-                if (MinecraftClient.getInstance().player != null) {
-                    MinecraftClient.getInstance()
-                        .inGameHud.getChatHud()
-                        .addMessage(
-                            Text.literal(
-                                `Error while in prelude.evalFile: ${error.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`,
-                            ).formatted(Formatting.RED),
-                        );
-                }
-            }
+            module.evalFile(module.globals.prelude[name], path.toString());
         } catch (e) {
-            if (MinecraftClient.getInstance().player != null) {
-                MinecraftClient.getInstance()
-                    .inGameHud.getChatHud()
-                    .addMessage(
-                        Text.literal(
-                            `Error while in prelude.eval file, reading file at path ${path}: ${error.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`,
-                        ).formatted(Formatting.RED),
-                    );
-            }
+            module.globals.init.error(
+                `Error while in prelude.evalFile at path ${path}: ${e.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`,
+            );
         }
+        prelude.evalStack.pop();
+    };
 
+    prelude.evalFile = function (path, name) {
+        if (!path.isAbsolute()) path = Path.of("/").resolve(path);
+        module.globals.preludePaths[name] = path;
+        module.globals.prelude[name] = "{" + Files.readString(path) + "}";
+        prelude.evalStack.push(path);
+        prelude.evalString(name);
         prelude.evalStack.pop();
     };
 
@@ -52,51 +42,44 @@ if (module.path[0] != "modules" || prelude.moduleName == undefined) {
 
         try {
             module.eval(content);
-        } catch (e2) {
-            if (MinecraftClient.getInstance().player != null) {
-                MinecraftClient.getInstance()
-                    .inGameHud.getChatHud()
-                    .addMessage(
-                        Text.literal(
-                            `Error while in prelude.eval [ident=${ident}]: ${error.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`,
-                        ).formatted(Formatting.RED),
-                    );
-            }
+        } catch (e) {
+            module.globals.init.error(
+                `Error while in prelude.eval [ident=${ident}]: ${e.toString()}\nCall stack:\n${prelude.evalStack.join("\n")}`,
+            );
         }
 
         prelude.evalStack.pop();
     };
 
-    let FabricLoader = Packages.net.fabricmc.loader.api.FabricLoader;
-
-    let modulesPath = FabricLoader.getInstance()
-        .getConfigDir()
-        .resolve("jscore")
-        .resolve("modules");
-
     for (let name of module.globals.loadDependencies[prelude.moduleName] ??
         []) {
-        let modulePath = modulesPath.resolve(name);
+        let gotPrelude = module.globals.prelude[name];
+        if (gotPrelude == false) continue;
+        if (gotPrelude == undefined) {
+            let modulePath = module.globals.init.modulesPath.resolve(name);
 
-        if (
-            module.globals.loadedModules === undefined ||
-            !module.globals.loadedModules[name]
-        )
-            continue;
-
-        let preludePath = modulePath.resolve("prelude.js");
-        
-        if (!Files.exists(preludePath)) {
             if (
-                Files.exists(modulePath.resolve("prelude").resolve("index.js"))
+                module.globals.loadedModules === undefined ||
+                !module.globals.loadedModules[name]
             ) {
-                preludePath = modulePath.resolve("prelude").resolve("index.js");
-            } else {
+                module.globals.prelude[name] = false;
                 continue;
             }
-        }
 
-        prelude.evalFile(preludePath);
+            let preludePath = modulePath.resolve("prelude.js");
+
+            if (!Files.exists(preludePath)) {
+                preludePath = modulePath.resolve("prelude/init.js");
+                if (!Files.exists(preludePath)) {
+                    module.globals.prelude[name] = false;
+                    continue;
+                }
+            }
+
+            prelude.evalFile(preludePath, name);
+        } else {
+            prelude.evalString(name);
+        }
     }
 }
 

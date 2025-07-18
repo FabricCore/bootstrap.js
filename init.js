@@ -1,5 +1,8 @@
 let Core = Packages.ws.siri.Core;
 
+module.globals.prelude = {};
+module.globals.preludePaths = {};
+
 let net = Packages.ws.siri.jscore.mapping.JSPackage.getRoot().net;
 let MinecraftClient = net.minecraft.client.MinecraftClient;
 let Text = net.minecraft.text.Text;
@@ -24,6 +27,11 @@ let modulesPath = FabricLoader.getInstance()
     .getConfigDir()
     .resolve("jscore")
     .resolve("modules");
+
+module.globals.init = {
+    error,
+    modulesPath,
+};
 
 let registeredModules = {};
 
@@ -136,5 +144,3 @@ while (Object.keys(registeredModules).length !== 0) {
         break;
     }
 }
-
-// module.exports = JSON.stringify(registeredModules)
